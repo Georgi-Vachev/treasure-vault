@@ -10,12 +10,15 @@ export class Handle extends Container {
     heightScaleFactor: number;
   } = Config.handleConfig;
 
+  private rotationCallback!: (direction: string) => void;
   private isAnimating = false;
   private handle!: Sprite;
   private handleShadow!: Sprite;
 
-  constructor() {
+  constructor(rotationCallback: (direction: string) => void) {
     super();
+
+    this.rotationCallback = rotationCallback;
 
     this.handle = new Sprite(Texture.from(Config.assets.handle));
     this.handleShadow = new Sprite(Texture.from(Config.assets.handleShadow));
@@ -61,6 +64,7 @@ export class Handle extends Container {
       duration: 0.5,
       onComplete: () => {
         this.isAnimating = false;
+        this.rotationCallback(angle < 0 ? "counterclockwise" : "clockwise");
       },
     });
   }

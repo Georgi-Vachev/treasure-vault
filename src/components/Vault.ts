@@ -9,17 +9,17 @@ export default class Vault extends Container {
   private vault!: Sprite;
   private door!: Door;
 
-  constructor() {
+  constructor(rotationCallback: (direction: string) => void) {
     super();
 
-    this.init();
+    this.init(rotationCallback);
 
     centerObjects(this);
   }
 
-  init() {
+  init(rotationCallback: (direction: string) => void) {
     this.createVault(new Sprite(Texture.from(Config.assets.vault)));
-    this.door = new Door();
+    this.door = new Door(rotationCallback);
 
     this.addChild(this.vault, this.door);
   }
@@ -33,28 +33,9 @@ export default class Vault extends Container {
     this.vault = sprite;
   }
 
-  // initPlayerMovement(object: {
-  //   state: { velocity: { x: number; y: number } };
-  // }) {
-  //   Ticker.shared.add((delta) => {
-  //     const x = object.state.velocity.x * delta;
-  //     const y = object.state.velocity.y * delta;
-
-  //     this.updatePosition(x, y);
-  //   });
-  // }
-
-  // updatePosition(x: number, y: number) {
-  //   for (const [index, child] of this.children.entries()) {
-  //     if (child instanceof TilingSprite) {
-  //       child.tilePosition.x -= x * index * this.config.panSpeed;
-  //       child.tilePosition.y -= y * index * this.config.panSpeed;
-  //     } else {
-  //       child.x -= x * index * this.config.panSpeed;
-  //       child.y -= y * index * this.config.panSpeed;
-  //     }
-  //   }
-  // }
+  open() {
+    this.door.open();
+  }
 
   resize(width: number) {
     if (this.vault) {

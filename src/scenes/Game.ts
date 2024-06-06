@@ -4,44 +4,79 @@ import Scene from "../core/Scene";
 export default class Game extends Scene {
   name = "Game";
 
-  // private player!: Player;
   private vault!: Vault;
+  private secretCombination!: { number: number; direction: string }[];
+  private enteredDirections: string[] = [];
 
   load() {
-    this.vault = new Vault();
-    // this.player = new Player();
-
-    // this.player.x = window.innerWidth / 2;
-    // this.player.y = window.innerHeight - this.player.height / 3;
-
-    // this.background.initPlayerMovement(this.player);
-
-    // this.addChild(this.background, this.player);
+    this.vault = new Vault(this.handleRotation.bind(this));
     this.addChild(this.vault);
   }
 
-  async start() {
-    // Example of how to play a spine animation
-    // const vine = new SpineAnimation("vine-pro");
+  start() {
+    this.secretCombination = this.generateSecretCombination();
 
-    // vine.stateData.setMix("grow", "grow", 0.5);
+    console.log(
+      this.secretCombination
+        .map((pair) => `${pair.number} ${pair.direction}`)
+        .join(", ")
+    );
+  }
 
-    // vine.x = 0;
-    // vine.y = window.innerHeight / 2 - 50;
+  handleRotation(direction: string) {
+    if (this.secretCombination[0]?.number) {
+      this.secretCombination[0].number--;
+    }
 
-    // this.background.addChild(vine);
+    const expectedDirection = this.secretCombination[0]?.direction;
 
-    // while (vine) {
-    //   await vine.play("grow");
-    // }
+    if (this.secretCombination[0].number === 0) {
+      this.secretCombination.shift();
+    }
+
+    if (direction !== expectedDirection) {
+      console.log("Resetting game");
+      this.resetGame();
+      return;
+    }
+
+    this.enteredDirections.push(direction);
+
+    if (!this.secretCombination.length) {
+      console.log("Vault opens");
+      this.openVault();
+    }
+  }
+
+  openVault() {
+    this.vault.open();
+  }
+
+  resetGame() {
+    this.start();
+  }
+
+  generateSecretCombination(): { number: number; direction: string }[] {
+    const directions = ["clockwise", "counterclockwise"];
+
+    const secretCombination: { number: number; direction: string }[] = [];
+
+    for (let i = 0; i < 3; i++) {
+      const randomNumber = Math.floor(Math.random() * 9) + 1;
+
+      const randomDirection =
+        directions[Math.floor(Math.random() * directions.length)];
+
+      secretCombination.push({
+        number: randomNumber,
+        direction: randomDirection,
+      });
+    }
+
+    return secretCombination;
   }
 
   onResize(width: number) {
-    // if (this.player) {
-    //   this.player.x = width / 2;
-    //   this.player.y = height - this.player.height / 3;
-    // }
-
     if (this.vault) {
       this.vault.resize(width);
     }

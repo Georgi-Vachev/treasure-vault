@@ -14,23 +14,24 @@ export class Door extends Container {
   } = Config.doorConfig;
 
   private door!: Sprite;
+  private doorOpen!: Sprite;
+  private doorShadow!: Sprite;
+
   private handle!: Handle;
 
-  constructor() {
+  constructor(rotationCallback: (direction: string) => void) {
     super();
 
-    this.init();
+    this.init(rotationCallback);
 
     this.interactive = true;
     this.closed = true;
-
-    // Add any event listeners or additional properties here
   }
 
-  init() {
+  init(rotationCallback: (direction: string) => void) {
     this.createDoor();
 
-    this.handle = new Handle();
+    this.handle = new Handle(rotationCallback);
 
     this.addChild(this.door, this.handle);
   }
@@ -51,17 +52,13 @@ export class Door extends Container {
   }
 
   open() {
-    if (this.closed) {
-      gsap.to(this, { x: this.x + 100, duration: 1 }); // Adjust animation as needed
-      this.closed = false;
-    }
+    this.door.alpha = 0;
+    this.handle.alpha = 0;
   }
 
   close() {
-    if (!this.closed) {
-      gsap.to(this, { x: this.x - 100, duration: 1 }); // Adjust animation as needed
-      this.closed = true;
-    }
+    this.door.alpha = 1;
+    this.handle.alpha = 1;
   }
 
   resize(width: number) {
