@@ -1,21 +1,15 @@
 import { Container, Texture, Sprite } from "pixi.js";
-import { gsap } from "gsap";
 import { Config } from "../config";
 import { Handle } from "./Handle";
 
+const config = Config.doorConfig;
+
 export class Door extends Container {
-  closed: boolean;
-
-  private config: {
-    offsetX: number;
-    offsetY: number;
-    widthScaleFactor: number;
-    heightScaleFactor: number;
-  } = Config.doorConfig;
-
-  private door!: Sprite;
-  private doorOpen!: Sprite;
+  private closedDoor!: Sprite;
+  private openDoor!: Sprite;
   private doorShadow!: Sprite;
+
+  private doorSprites: { sprite: Sprite; config: any }[] = [];
 
   private handle!: Handle;
 
@@ -25,58 +19,87 @@ export class Door extends Container {
     this.init(rotationCallback);
 
     this.interactive = true;
-    this.closed = true;
   }
 
   init(rotationCallback: (direction: string) => void) {
-    this.createDoor();
+    this.createClosedDoor();
+    this.createOpenDoor();
+    this.createDoorShadow();
 
     this.handle = new Handle(rotationCallback);
 
-    this.addChild(this.door, this.handle);
+    this.resize(window.innerWidth);
+
+    this.addChild(this.closedDoor, this.doorShadow, this.openDoor, this.handle);
   }
 
-  createDoor() {
-    const sprite = new Sprite(Texture.from(Config.assets.door));
-
-    sprite.position.set(
-      window.innerWidth * this.config.offsetX,
-      window.innerWidth * this.config.offsetY
-    );
+  createClosedDoor() {
+    const sprite = new Sprite(Texture.from(Config.assets.closedDoor));
 
     sprite.anchor.set(0.5);
 
-    this.scaleSprite(sprite);
+    this.closedDoor = sprite;
+    this.doorSprites.push({ sprite, config: config.closedDoor });
+  }
 
-    this.door = sprite;
+  createOpenDoor() {
+    const sprite = new Sprite(Texture.from(Config.assets.openDoor));
+
+    sprite.anchor.set(0.5);
+    sprite.alpha = 0;
+    sprite.name = "openDoor";
+
+    this.openDoor = sprite;
+    this.doorSprites.push({ sprite, config: config.openDoor });
+  }
+
+  createDoorShadow() {
+    const sprite = new Sprite(Texture.from(Config.assets.doorShadow));
+
+    sprite.anchor.set(0.5);
+    sprite.alpha = 0;
+    sprite.name = "doorShadow";
+
+    this.doorShadow = sprite;
+    this.doorSprites.push({ sprite, config: config.doorShadow });
   }
 
   open() {
-    this.door.alpha = 0;
+    this.closedDoor.alpha = 0;
     this.handle.alpha = 0;
+    this.openDoor.alpha = 1;
+    this.doorShadow.alpha = 1;
   }
 
   close() {
-    this.door.alpha = 1;
+    this.closedDoor.alpha = 1;
     this.handle.alpha = 1;
+    this.openDoor.alpha = 0;
+    this.doorShadow.alpha = 0;
   }
 
   resize(width: number) {
-    if (this.door) {
-      this.door.position.set(
-        width * this.config.offsetX,
-        width * this.config.offsetY
-      );
+    this.positionDoors(width);
+    this.scaleDoors();
 
-      this.scaleSprite(this.door);
-
-      this.handle.resize(width);
-    }
+    this.handle.resize(width);
   }
 
-  scaleSprite(sprite: Sprite) {
-    sprite.width = window.innerWidth / this.config.widthScaleFactor;
-    sprite.height =
-      (window.innerWidth / this.config.heightScaleFactor) * (9 / 16);
+  positionDoors(width: number) {
+    this.doorSprites.forEach((doorSprite: { sprite: Sprite; config: any }) => {
+      doorSprite.sprite.position.set(
+        width * doorSprite.config.offsetX,
+        width * doorSprite.config.offsetY
+      );
+    });
+  }
+
+  scaleDoors() {
+    this.doorSprites.forEach((doorSprite: { sprite: Sprite; config: any }) => {
+      doorSprite.sprite.width =
+        window.innerWidth / doorSprite.config.widthScaleFactor;
+      doorSprite.sprite.height =
+        (window.innerWidth / doorSprite.config.heightScaleFactor) * (9 / 16);
+    });
   }
 }

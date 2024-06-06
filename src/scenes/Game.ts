@@ -4,6 +4,7 @@ import Scene from "../core/Scene";
 export default class Game extends Scene {
   name = "Game";
 
+  private isVaultOpen = false;
   private vault!: Vault;
   private secretCombination!: { number: number; direction: string }[];
   private enteredDirections: string[] = [];
@@ -15,6 +16,7 @@ export default class Game extends Scene {
 
   start() {
     this.secretCombination = this.generateSecretCombination();
+    this.isVaultOpen = false;
 
     console.log(
       this.secretCombination
@@ -24,6 +26,10 @@ export default class Game extends Scene {
   }
 
   handleRotation(direction: string) {
+    if (this.isVaultOpen) {
+      return;
+    }
+
     if (this.secretCombination[0]?.number) {
       this.secretCombination[0].number--;
     }
@@ -35,7 +41,6 @@ export default class Game extends Scene {
     }
 
     if (direction !== expectedDirection) {
-      console.log("Resetting game");
       this.resetGame();
       return;
     }
@@ -43,13 +48,13 @@ export default class Game extends Scene {
     this.enteredDirections.push(direction);
 
     if (!this.secretCombination.length) {
-      console.log("Vault opens");
       this.openVault();
     }
   }
 
   openVault() {
-    this.vault.open();
+    this.vault.open(this.resetGame.bind(this));
+    this.isVaultOpen = true;
   }
 
   resetGame() {
