@@ -8,6 +8,12 @@ export const Config = {
     handle: "handle",
     handleShadow: "handleShadow",
   },
+  counterConfig: {
+    offsetX: -0.2,
+    offsetY: -0.036,
+    widthScaleFactor: 0.01,
+    heightScaleFactor: 0.035,
+  },
   shineParticlesConfig: {
     particle0: {
       offsetX: 0.17,

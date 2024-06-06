@@ -1,10 +1,11 @@
-import { Container, Texture, Sprite } from "pixi.js";
+import { Container, Texture, Sprite, Text, Ticker } from "pixi.js";
 import { gsap } from "gsap";
 import { centerObjects } from "../utils/misc";
 import { Config } from "../config";
 import { Door } from "./Door";
 
 const particlesConfig = Config.shineParticlesConfig;
+const counterConfig = Config.counterConfig;
 
 export default class Vault extends Container {
   name = "Background";
@@ -12,9 +13,15 @@ export default class Vault extends Container {
   private vault!: Sprite;
   private door!: Door;
   private shineParticles: { sprite: Sprite; config: any }[] = [];
+  private counterText!: Text;
+  private counter!: number;
+  private elapsed!: number;
 
   constructor(rotationCallback: (direction: string) => void) {
     super();
+
+    this.counter = 0;
+    this.elapsed = 0;
 
     this.init(rotationCallback);
 
@@ -24,9 +31,13 @@ export default class Vault extends Container {
   init(rotationCallback: (direction: string) => void) {
     this.createVault();
     this.createShineParticles();
+    this.createCounter();
+
+    Ticker.shared.add(this.update, this);
+
     this.door = new Door(rotationCallback);
 
-    this.addChild(this.vault, this.door);
+    this.addChild(this.vault, this.counterText, this.door);
   }
 
   createVault() {
@@ -63,6 +74,30 @@ export default class Vault extends Container {
     }
   }
 
+  createCounter() {
+    this.counterText = new Text(this.counter.toString(), {
+      fontFamily: "Arial",
+      fontSize: 80,
+      fill: 0xffffff, // White color
+    });
+
+    this.scaleAndPositionCounter(window.innerWidth);
+  }
+
+  update(delta: number) {
+    this.elapsed += delta;
+
+    if (this.elapsed >= 60) {
+      this.incrementCounter();
+      this.elapsed = 0;
+    }
+  }
+
+  incrementCounter() {
+    this.counter += 1;
+    this.counterText.text = this.counter.toString();
+  }
+
   open(resetGameCallback: () => void) {
     this.door.open();
 
@@ -91,6 +126,7 @@ export default class Vault extends Container {
 
   resetGame() {
     this.door.resetGame();
+    this.counter = -1;
   }
 
   resize(width: number) {
@@ -98,9 +134,22 @@ export default class Vault extends Container {
       this.vault.width = width;
       this.vault.height = width * (9 / 16);
 
+      this.scaleAndPositionCounter(width);
+
       this.door.resize(width);
     }
 
     centerObjects(this);
+  }
+
+  scaleAndPositionCounter(width: number) {
+    this.counterText.width = width * counterConfig.widthScaleFactor;
+    this.counterText.height =
+      width * counterConfig.heightScaleFactor * (9 / 16);
+
+    this.counterText.position.set(
+      width * counterConfig.offsetX,
+      width * counterConfig.offsetY
+    );
   }
 }
