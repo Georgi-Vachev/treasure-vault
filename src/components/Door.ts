@@ -78,6 +78,10 @@ export class Door extends Container {
     this.doorShadow.alpha = 0;
   }
 
+  resetGame() {
+    this.handle.turboSpinHandle();
+  }
+
   resize(width: number) {
     this.positionDoors(width);
     this.scaleDoors();

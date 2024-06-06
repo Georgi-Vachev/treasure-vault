@@ -69,6 +69,18 @@ export class Handle extends Container {
     });
   }
 
+  turboSpinHandle() {
+    this.isAnimating = true;
+
+    gsap.to([this.handle, this.handleShadow], {
+      rotation: this.handle.rotation + Math.PI * 10,
+      duration: 0.7,
+      onComplete: () => {
+        this.isAnimating = false;
+      },
+    });
+  }
+
   resize(width: number) {
     this.handle.position.set(
       width * this.config.offsetX,

@@ -59,6 +59,7 @@ export default class Game extends Scene {
 
   resetGame() {
     this.start();
+    this.vault.resetGame();
   }
 
   generateSecretCombination(): { number: number; direction: string }[] {

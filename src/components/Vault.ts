@@ -84,8 +84,13 @@ export default class Vault extends Container {
 
     Promise.all(completionPromises).then(() => {
       this.door.close();
+      this.resetGame();
       resetGameCallback();
     });
+  }
+
+  resetGame() {
+    this.door.resetGame();
   }
 
   resize(width: number) {
