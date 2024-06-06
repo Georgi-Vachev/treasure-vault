@@ -1,40 +1,83 @@
-import * as PIXI from "pixi.js";
+import { Container, Sprite, Texture } from "pixi.js";
 import { gsap } from "gsap";
 import { Config } from "../config";
 
-export class Handle extends PIXI.Sprite {
-  private offsets: { x: number; y: number } = Config.handleOffsets;
+export class Handle extends Container {
+  private config: {
+    offsetX: number;
+    offsetY: number;
+    widthScaleFactor: number;
+    heightScaleFactor: number;
+  } = Config.handleConfig;
 
-  constructor(texture: PIXI.Texture) {
-    super(texture);
-    this.interactive = true;
-    // this.buttonMode = true;
+  private isAnimating = false;
+  private handle!: Sprite;
+  private handleShadow!: Sprite;
 
-    this.position.set(
-      window.innerWidth * this.offsets.x,
-      window.innerWidth * this.offsets.y
+  constructor() {
+    super();
+
+    this.handle = new Sprite(Texture.from(Config.assets.handle));
+    this.handleShadow = new Sprite(Texture.from(Config.assets.handleShadow));
+
+    this.handle.interactive = true;
+
+    this.handleShadow.anchor.set(0.5);
+    this.handle.anchor.set(0.5);
+
+    this.handle.position.set(
+      window.innerWidth * this.config.offsetX,
+      window.innerWidth * this.config.offsetY
     );
 
-    this.width = window.innerWidth / 8.1;
-    this.height = (window.innerWidth / 4) * (9 / 16);
+    this.scaleSprite(this.handleShadow);
+    this.scaleSprite(this.handle);
 
-    this.anchor.set(0.5);
+    this.addChild(this.handleShadow, this.handle);
 
-    this.on("pointerdown", this.onPointerDown.bind(this));
+    this.handle.on("pointerdown", this.onPointerDown.bind(this));
   }
 
-  onPointerDown() {
-    this.turnHandle();
+  onPointerDown(event: { data: { global: { x: number } } }) {
+    if (!this.isAnimating) {
+      const mouseX = event.data.global.x;
+      const windowWidth = window.innerWidth;
+
+      const isMouseLeft = mouseX < windowWidth / 2;
+
+      if (isMouseLeft) {
+        this.rotateHandle(-Math.PI / 3);
+      } else {
+        this.rotateHandle(Math.PI / 3);
+      }
+    }
   }
 
-  turnHandle() {
-    gsap.to(this, { rotation: this.rotation + Math.PI / 2, duration: 1 }); // Adjust animation as needed
+  rotateHandle(angle: number) {
+    this.isAnimating = true;
+
+    gsap.to([this.handle, this.handleShadow], {
+      rotation: this.handle.rotation + angle,
+      duration: 0.5,
+      onComplete: () => {
+        this.isAnimating = false;
+      },
+    });
   }
 
   resize(width: number) {
-    this.position.set(width * this.offsets.x, width * this.offsets.y);
+    this.handle.position.set(
+      width * this.config.offsetX,
+      width * this.config.offsetY
+    );
 
-    this.width = window.innerWidth / 8.1;
-    this.height = (window.innerWidth / 4) * (9 / 16);
+    this.scaleSprite(this.handle);
+    this.scaleSprite(this.handleShadow);
+  }
+
+  scaleSprite(sprite: Sprite) {
+    sprite.width = window.innerWidth / this.config.widthScaleFactor;
+    sprite.height =
+      (window.innerWidth / this.config.heightScaleFactor) * (9 / 16);
   }
 }

@@ -3,13 +3,18 @@ export const Config = {
     vault: "bg",
     door: "door",
     handle: "handle",
+    handleShadow: "handleShadow",
   },
-  doorOffsets: {
-    x: 0.01,
-    y: -0.009,
+  doorConfig: {
+    offsetX: 0.01,
+    offsetY: -0.009,
+    widthScaleFactor: 2.8,
+    heightScaleFactor: 1.65,
   },
-  handleOffsets: {
-    x: -0.005,
-    y: -0.009,
+  handleConfig: {
+    offsetX: -0.005,
+    offsetY: -0.009,
+    widthScaleFactor: 8.1,
+    heightScaleFactor: 4,
   },
 };

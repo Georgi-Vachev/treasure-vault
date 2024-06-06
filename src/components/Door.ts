@@ -6,7 +6,12 @@ import { Handle } from "./Handle";
 export class Door extends Container {
   closed: boolean;
 
-  private offsets: { x: number; y: number } = Config.doorOffsets;
+  private config: {
+    offsetX: number;
+    offsetY: number;
+    widthScaleFactor: number;
+    heightScaleFactor: number;
+  } = Config.doorConfig;
 
   private door!: Sprite;
   private handle!: Handle;
@@ -23,22 +28,24 @@ export class Door extends Container {
   }
 
   init() {
-    this.createDoor(new Sprite(Texture.from(Config.assets.door)));
-    this.handle = new Handle(Texture.from(Config.assets.handle));
+    this.createDoor();
+
+    this.handle = new Handle();
 
     this.addChild(this.door, this.handle);
   }
 
-  createDoor(sprite: Sprite) {
+  createDoor() {
+    const sprite = new Sprite(Texture.from(Config.assets.door));
+
     sprite.position.set(
-      window.innerWidth * this.offsets.x,
-      window.innerWidth * this.offsets.y
+      window.innerWidth * this.config.offsetX,
+      window.innerWidth * this.config.offsetY
     );
 
-    sprite.width = window.innerWidth / 2.8;
-    sprite.height = (window.innerWidth / 1.65) * (9 / 16);
-
     sprite.anchor.set(0.5);
+
+    this.scaleSprite(sprite);
 
     this.door = sprite;
   }
@@ -59,12 +66,20 @@ export class Door extends Container {
 
   resize(width: number) {
     if (this.door) {
-      this.door.position.set(width * this.offsets.x, width * this.offsets.y);
+      this.door.position.set(
+        width * this.config.offsetX,
+        width * this.config.offsetY
+      );
 
-      this.door.width = window.innerWidth / 2.8;
-      this.door.height = (window.innerWidth / 1.65) * (9 / 16);
+      this.scaleSprite(this.door);
 
       this.handle.resize(width);
     }
+  }
+
+  scaleSprite(sprite: Sprite) {
+    sprite.width = window.innerWidth / this.config.widthScaleFactor;
+    sprite.height =
+      (window.innerWidth / this.config.heightScaleFactor) * (9 / 16);
   }
 }
