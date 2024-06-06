@@ -1,8 +1,10 @@
 ## Usage 🛠️
 
-1. Navigate to the project's directory and install the project dependencies using `npm install`.
+1. Clone the repository using `git clone https://github.com/Georgi-Vachev/treasure-vault.git`
 
-2. Then use one of the folloing commands to either run dev server or preview production build.
+2. Navigate to the project's directory and install the project dependencies using `npm install`.
+
+3. Then use one of the folloing commands to either run dev server or preview production build.
 
 
 | Command           | Description                                                          |
